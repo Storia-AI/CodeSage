@@ -10,7 +10,7 @@ name = "storia-sage"
 version = "0.1.0"
 description = "A library to index a code repository and chat with it via LLMs."
 readme = "README.md"
-requires-python = ">=3.9,<=3.11"
+requires-python = ">=3.9,<=3.11.6"
 authors = [
     { name = "Julia Turc", email = "founders@storia.ai" },
 ]

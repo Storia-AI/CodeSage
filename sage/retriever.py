@@ -93,8 +93,11 @@ class LLMRetriever(BaseRetriever):
             client = anthropic.Anthropic()
 
             def count_tokens(x):
-                count = client.beta.messages.count_tokens(model=CLAUDE_MODEL, messages=[{"role": "user", "content": x}])
-                return count.input_tokens
+                count = client.count_tokens(x)  # Just pass the content string directly
+                return count
+            # def count_tokens(x):
+            #     count = client.count_tokens(messages=[{"role": "user", "content": x}])
+            #     return count.input_tokens
 
             if count_tokens(render) > max_tokens:
                 logging.info("File hierarchy is too large; excluding methods.")
@@ -187,11 +190,18 @@ DO NOT RESPOND TO THE USER QUERY DIRECTLY. Instead, respond with full paths to r
         system_message = {"type": "text", "text": system_prompt, "cache_control": {"type": "ephemeral"}}
         user_message = {"role": "user", "content": user_prompt}
 
-        response = anthropic.Anthropic().beta.prompt_caching.messages.create(
+        # response = anthropic.Anthropic().prompt_caching.messages.create(
+        #     model=CLAUDE_MODEL,
+        #     max_tokens=1024,  # The maximum number of *output* tokens to generate.
+        #     system=[system_message],
+        #     messages=[user_message],
+        # )
+
+        response = anthropic.Anthropic().messages.create(
             model=CLAUDE_MODEL,
-            max_tokens=1024,  # The maximum number of *output* tokens to generate.
-            system=[system_message],
-            messages=[user_message],
+            max_tokens=1024,
+            system=system_message['text'],  # Note: system message is passed directly, not in a list
+            messages=[user_message]
         )
         # Caching information will be under `cache_creation_input_tokens` and `cache_read_input_tokens`.
         # Note that, for prompts shorter than 1024 tokens, Anthropic will not do any caching.

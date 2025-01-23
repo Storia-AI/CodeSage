@@ -74,7 +74,7 @@ def add_config_args(parser: ArgumentParser):
 
 def add_repo_args(parser: ArgumentParser) -> Callable:
     """Adds repository-related arguments to the parser and returns a validator."""
-    parser.add("repo_id", help="The ID of the repository to index")
+    # parser.add("repo_id", help="The ID of the repository to index")
     parser.add("--commit-hash", help="Optional commit hash to checkout. When not provided, defaults to HEAD.")
     parser.add(
         "--local-dir",
@@ -234,7 +234,7 @@ def add_all_args(parser: ArgumentParser) -> Callable:
     """Adds all arguments to the parser and returns a validator."""
     arg_validators = [
         add_config_args(parser),
-        add_repo_args(parser),
+        # add_repo_args(parser),
         add_embedding_args(parser),
         add_vector_store_args(parser),
         add_reranking_args(parser),

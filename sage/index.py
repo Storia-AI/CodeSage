@@ -36,9 +36,9 @@ def main():
     for validator in arg_validators:
         validator(args)
 
-    if args.llm_retriever:
-        logging.warning("The LLM retriever does not require indexing, so this script is a no-op.")
-        return
+    # if args.llm_retriever:
+    #     logging.warning("The LLM retriever does not require indexing, so this script is a no-op.")
+    #     return
 
     # Additionally validate embedder and vector store compatibility.
     vector_store_providers = [member.value for member in VectorStoreProvider]

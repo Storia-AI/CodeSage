@@ -57,6 +57,14 @@ def build_rag_chain(args):
         ]
     )
 
+    test_input = {
+        "input": "What are the main functions?",
+        "chat_history": [
+            {"role": "user", "content": "Previous question"},
+            {"role": "assistant", "content": "Previous answer"}
+        ]
+    }
+
     question_answer_chain = create_stuff_documents_chain(llm, qa_prompt)
     rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
     return rag_chain
@@ -76,7 +84,6 @@ def main():
     args = parser.parse_args()
     validator(args)
 
-    rag_chain = build_rag_chain(args)
 
     def source_md(file_path: str, url: str) -> str:
         """Formats a context source in Markdown."""
@@ -92,6 +99,7 @@ def main():
 
         query_rewrite = ""
         response = ""
+
         async for event in rag_chain.astream_events(
             {
                 "input": message,
@@ -117,12 +125,39 @@ def main():
                     response += chunk
                     yield response
 
-    gr.ChatInterface(
-        _predict,
-        title=args.repo_id,
-        examples=["What does this repo do?", "Give me some sample code."],
-    ).launch(share=args.share)
+    def on_repo_name_change(repo_name):
+        if repo_name:
+            args.repo_id = repo_name
+            rag_chain = build_rag_chain(args)
+            return gr.update(value=repo_name, interactive=False), rag_chain
+        else:
+            return gr.update(value="", interactive=True), None
 
+    with gr.Blocks() as demo:
+        repo_name_input = gr.Textbox(label="Repository Name", placeholder="Enter the repository name (e.g., 'owner/repo')")
+        load_button = gr.Button("Load Repository")
+
+        # rag_chain = build_rag_chain(args, repo_name = )
+
+        # repo_name_input.change(on_repo_name_change, inputs=[repo_name_input], outputs=[repo_name_input,])
+
+        # chat_interface = gr.ChatInterface(
+        #     _predict,
+        #     title="Sage - Codebase Chat",
+        #     examples=["What does this repo do?", "Give me some sample code."],
+        # )
+
+        chat_interface = gr.ChatInterface(
+            _predict,
+            title="chat with codebase",
+            examples=["What does this repo do?", "Give me some sample code."],
+            css="footer {visibility: hidden}"
+        )
+
+        load_button.click(on_repo_name_change, inputs=[repo_name_input], outputs=[repo_name_input])
+
+    
+    demo.launch(quiet=True)
 
 if __name__ == "__main__":
     main()
